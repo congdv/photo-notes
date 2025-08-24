@@ -41,19 +41,23 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
     }
   }, [routeNoteId, notes, routeImage]);
 
-  const onSave = async () => {
-    try {
-      const payload = { note: noteText.slice(0, 30) || 'Untitled', body: noteText, imageUri };
-      if (routeNoteId) {
-        await updateNote(routeNoteId, payload);
-      } else {
-        await addNote(payload);
+  // Autosave: debounce changes and persist
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      try {
+        const payload = { note: noteText.slice(0, 30) || 'Untitled', body: noteText, imageUri };
+        if (routeNoteId) {
+          await updateNote(routeNoteId, payload);
+        } else {
+          await addNote(payload);
+        }
+      } catch (error) {
+        console.error('Autosave failed:', error);
       }
-      navigation.goBack();
-    } catch (error) {
-      console.error('Failed to save note:', error);
-    }
-  };
+    }, 800);
+
+    return () => clearTimeout(t);
+  }, [noteText, imageUri, routeNoteId]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -83,9 +87,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
             />
           </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={onSave}>
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
+          {/* autosave enabled; Save button removed */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

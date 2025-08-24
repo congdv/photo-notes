@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Note, NoteFormData, LayoutMode, NotesContextType } from '../types';
 import { storage } from '../utils/storage';
+import { generateUuidV4 } from '../utils/uuid';
 
 interface NotesState {
   notes: Note[];
@@ -84,12 +85,12 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
   };
 
   const addNote = async (noteData: NoteFormData) => {
-    const timestamp = Date.now();
+    const now = Date.now();
     const newNote: Note = {
-      id: timestamp.toString(),
+      id: generateUuidV4(),
       ...noteData,
-      createdAt: timestamp,
-      updatedAt: timestamp,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const newNotes = [newNote, ...state.notes];
