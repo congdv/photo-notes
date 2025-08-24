@@ -1,7 +1,6 @@
 export interface Note {
   id: string;
   note: string;
-  body: string;
   imageUri?: string;
   createdAt: number;
   updatedAt: number;
@@ -9,7 +8,6 @@ export interface Note {
 
 export interface NoteFormData {
   note: string;
-  body: string;
   imageUri?: string;
 }
 

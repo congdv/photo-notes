@@ -56,7 +56,7 @@ const HomeScreen = () => {
       if (assetUri) {
         // create a new note with imageUri so it has an id, then navigate to editor to add text
         try {
-          const created = await addNote({ note: '', body: '', imageUri: assetUri });
+          const created = await addNote({ note: '', imageUri: assetUri });
           if (created?.id) {
             navigation.navigate('NoteEditor', { noteId: created.id });
           }

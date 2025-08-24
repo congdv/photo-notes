@@ -142,11 +142,7 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
 
     if (state.searchQuery.trim()) {
       const query = state.searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        note =>
-          note.note.toLowerCase().includes(query) ||
-          note.body.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(note => note.note.toLowerCase().includes(query));
     }
 
     // Sort by updatedAt desc

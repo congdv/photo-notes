@@ -161,18 +161,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 22,
   },
-  body: {
-    color: COLORS.textSecondary,
-    lineHeight: 18,
-  },
-  gridBody: {
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  listBody: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
+  // body styles removed; note content is stored in `note` and displayed as title when present
   timestamp: {
     fontSize: 12,
     color: COLORS.textSecondary,
