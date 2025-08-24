@@ -107,8 +107,9 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
   };
 
   const updateNote = async (id: string, updates: Partial<Note>) => {
+    // no update the timestamp
     const updatedNotes = state.notes.map(note =>
-      note.id === id ? { ...note, ...updates, updatedAt: Date.now() } : note
+      note.id === id ? { ...note, ...updates } : note
     );
     dispatch({ type: 'SET_NOTES', payload: updatedNotes });
     try {
