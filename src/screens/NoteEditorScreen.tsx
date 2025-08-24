@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Image, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useNotes } from '../context/NotesContext';
@@ -15,15 +16,39 @@ type Props = {
 };
 
 const NoteEditorScreen: React.FC<Props> = ({ route }) => {
-  const imageUri = route.params?.imageUri;
+  const routeImage = route.params?.imageUri;
+  const routeNoteId = route.params?.noteId;
+
+  const [imageUri, setImageUri] = useState<string | undefined>(routeImage);
   const [noteText, setNoteText] = useState('');
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { addNote } = useNotes();
+  const { addNote, updateNote, notes } = useNotes();
+
+  // Load existing note when editing
+  useEffect(() => {
+    if (routeNoteId) {
+      const existing = notes.find(n => n.id === routeNoteId);
+      if (existing) {
+        setNoteText(existing.body || '');
+        // prefer a freshly passed image (from camera) otherwise keep existing
+        setImageUri(routeImage ?? existing.imageUri);
+      }
+    } else {
+      // new note, may have an image from route
+      setNoteText('');
+      setImageUri(routeImage);
+    }
+  }, [routeNoteId, notes, routeImage]);
 
   const onSave = async () => {
     try {
-      await addNote({ note: noteText.slice(0, 30) || 'Untitled', body: noteText, imageUri });
+      const payload = { note: noteText.slice(0, 30) || 'Untitled', body: noteText, imageUri };
+      if (routeNoteId) {
+        await updateNote(routeNoteId, payload);
+      } else {
+        await addNote(payload);
+      }
       navigation.goBack();
     } catch (error) {
       console.error('Failed to save note:', error);
@@ -34,6 +59,11 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            </TouchableOpacity>
+          </View>
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
           ) : (
@@ -93,6 +123,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: { color: COLORS.surface, fontWeight: '600' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  backButton: { marginLeft: -4, padding: 4 },
 });
 
 export default NoteEditorScreen;
