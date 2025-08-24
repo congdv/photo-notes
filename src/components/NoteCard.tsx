@@ -81,12 +81,13 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
         ) : null}
 
 
-        {/* Timestamp */}
-        <Text style={styles.timestamp}>{formatDate(note.updatedAt)}</Text>
+
       </View>
 
       {/* Action buttons (only delete for now) */}
       <View style={styles.actions}>
+        {/* Timestamp */}
+        <Text style={styles.timestamp}>{formatDate(note.updatedAt)}</Text>
         <TouchableOpacity
           style={styles.actionButton}
           onPress={handleDelete}
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     marginTop: 12,
     gap: 8,
   },
