@@ -115,21 +115,23 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        {/* Fixed Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => addPhoto()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <MaterialCommunityIcons name="camera-plus" size={24} color={COLORS.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Scrollable Content */}
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerRow}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => addPhoto()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <MaterialCommunityIcons name="camera-plus" size={24} color={COLORS.text} />
-            </TouchableOpacity>
-          </View>
-
           <ImageGrid
             images={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
             onImagePress={(index) => { setViewerIndex(index); setViewerVisible(true); }}
@@ -210,7 +212,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: { color: COLORS.surface, fontWeight: '600' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: COLORS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
   backButton: { marginLeft: -4, padding: 4 },
   viewerContainer: { flex: 1, backgroundColor: '#000' },
   viewerClose: { position: 'absolute', top: 40, right: 20, zIndex: 2, padding: 8 },
