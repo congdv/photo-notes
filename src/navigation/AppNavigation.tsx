@@ -6,8 +6,8 @@ import NoteEditorScreen from '../screens/NoteEditorScreen';
 
 export type RootStackParamList = {
   Home: undefined;
-  // noteId kept for existing flows; imageUri added so we can pass a photo when creating/editing a note
-  NoteEditor: { noteId?: string; imageUri?: string } | undefined;
+  // noteId kept for existing flows; imageUri removed — app creates the note first and navigates with noteId
+  NoteEditor: { noteId?: string } | undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();

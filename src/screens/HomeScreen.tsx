@@ -14,7 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { getFilteredNotes, deleteNote, setSearchQuery: setGlobalSearch, layoutMode } = useNotes();
+  const { getFilteredNotes, deleteNote, setSearchQuery: setGlobalSearch, layoutMode, addNote } = useNotes();
 
   // debounce updating global search to avoid excessive recomputation
   useEffect(() => {
@@ -54,8 +54,15 @@ const HomeScreen = () => {
       const assetUri = (result as any)?.assets?.[0]?.uri ?? (result as any)?.uri;
 
       if (assetUri) {
-        // navigate to note editor with the captured image
-        navigation.navigate('NoteEditor', { imageUri: assetUri });
+        // create a new note with imageUri so it has an id, then navigate to editor to add text
+        try {
+          const created = await addNote({ note: '', body: '', imageUri: assetUri });
+          if (created?.id) {
+            navigation.navigate('NoteEditor', { noteId: created.id });
+          }
+        } catch (err) {
+          console.error('Failed to create note before navigation:', err);
+        }
       } else {
         // user cancelled or no uri available
         console.log('No image returned from camera (user cancelled or unsupported shape).', result);

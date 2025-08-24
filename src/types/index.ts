@@ -19,7 +19,7 @@ export interface NotesContextType {
   notes: Note[];
   searchQuery: string;
   layoutMode: LayoutMode;
-  addNote: (note: NoteFormData) => void;
+  addNote: (note: NoteFormData) => Promise<Note>;
   updateNote: (id: string, updates: Partial<Note>) => void;
   deleteNote: (id: string) => void;
   setSearchQuery: (query: string) => void;

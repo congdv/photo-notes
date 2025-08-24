@@ -84,7 +84,7 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
     }
   };
 
-  const addNote = async (noteData: NoteFormData) => {
+  const addNote = async (noteData: NoteFormData): Promise<Note> => {
     const now = Date.now();
     const newNote: Note = {
       id: generateUuidV4(),
@@ -101,6 +101,8 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Failed to save notes after add:', error);
     }
+
+    return newNote;
   };
 
   const updateNote = async (id: string, updates: Partial<Note>) => {

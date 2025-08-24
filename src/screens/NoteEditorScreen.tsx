@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Image, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, StackActions } from '@react-navigation/native';
 import { useNotes } from '../context/NotesContext';
 import type { NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigation';
@@ -16,10 +16,8 @@ type Props = {
 };
 
 const NoteEditorScreen: React.FC<Props> = ({ route }) => {
-  const routeImage = route.params?.imageUri;
   const routeNoteId = route.params?.noteId;
-
-  const [imageUri, setImageUri] = useState<string | undefined>(routeImage);
+  const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [noteText, setNoteText] = useState('');
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -31,15 +29,14 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
       const existing = notes.find(n => n.id === routeNoteId);
       if (existing) {
         setNoteText(existing.body || '');
-        // prefer a freshly passed image (from camera) otherwise keep existing
-        setImageUri(routeImage ?? existing.imageUri);
+        setImageUri(existing.imageUri);
       }
     } else {
-      // new note, may have an image from route
+      // new note
       setNoteText('');
-      setImageUri(routeImage);
+      setImageUri(undefined);
     }
-  }, [routeNoteId, notes, routeImage]);
+  }, [routeNoteId, notes]);
 
   // Autosave: debounce changes and persist
   useEffect(() => {
@@ -49,7 +46,11 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
         if (routeNoteId) {
           await updateNote(routeNoteId, payload);
         } else {
-          await addNote(payload);
+          const created = await addNote(payload);
+          // replace the route so future saves update the created note
+          if (created?.id) {
+            navigation.dispatch(StackActions.replace('NoteEditor', { noteId: created.id }));
+          }
         }
       } catch (error) {
         console.error('Autosave failed:', error);
