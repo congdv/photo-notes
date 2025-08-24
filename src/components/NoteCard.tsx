@@ -80,14 +80,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
           </Text>
         ) : null}
 
-        {note.body?.trim() ? (
-          <Text
-            style={[styles.body, isGrid ? styles.gridBody : styles.listBody]}
-            numberOfLines={isGrid ? 4 : 2}
-          >
-            {note.body}
-          </Text>
-        ) : null}
 
         {/* Timestamp */}
         <Text style={styles.timestamp}>{formatDate(note.updatedAt)}</Text>

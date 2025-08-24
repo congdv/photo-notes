@@ -88,6 +88,9 @@ const HomeScreen = () => {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={EmptyNotes}
+        numColumns={layoutMode === 'grid' ? 2 : 1}
+        columnWrapperStyle={layoutMode === 'grid' ? { justifyContent: 'space-between', paddingHorizontal: 16 } : undefined}
+        contentContainerStyle={layoutMode === 'grid' ? { paddingTop: 12, paddingBottom: 24 } : { paddingBottom: 24 }}
       />
       <TouchableOpacity style={styles.fab} onPress={takePicture}>
         <Ionicons name="add" size={24} color={COLORS.surface} />
