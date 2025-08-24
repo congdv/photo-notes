@@ -84,29 +84,44 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
   };
 
   const addNote = async (noteData: NoteFormData) => {
+    const timestamp = Date.now();
     const newNote: Note = {
-      id: Date.now().toString(),
+      id: timestamp.toString(),
       ...noteData,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
     };
 
-    dispatch({ type: 'ADD_NOTE', payload: newNote });
-    await storage.saveNotes([newNote, ...state.notes]);
+    const newNotes = [newNote, ...state.notes];
+    // Update local state and persist computed list
+    dispatch({ type: 'SET_NOTES', payload: newNotes });
+    try {
+      await storage.saveNotes(newNotes);
+    } catch (error) {
+      console.error('Failed to save notes after add:', error);
+    }
   };
 
   const updateNote = async (id: string, updates: Partial<Note>) => {
-    dispatch({ type: 'UPDATE_NOTE', payload: { id, updates } });
     const updatedNotes = state.notes.map(note =>
       note.id === id ? { ...note, ...updates, updatedAt: Date.now() } : note
     );
-    await storage.saveNotes(updatedNotes);
+    dispatch({ type: 'SET_NOTES', payload: updatedNotes });
+    try {
+      await storage.saveNotes(updatedNotes);
+    } catch (error) {
+      console.error('Failed to save notes after update:', error);
+    }
   };
 
   const deleteNote = async (id: string) => {
-    dispatch({ type: 'DELETE_NOTE', payload: id });
     const filteredNotes = state.notes.filter(note => note.id !== id);
-    await storage.saveNotes(filteredNotes);
+    dispatch({ type: 'SET_NOTES', payload: filteredNotes });
+    try {
+      await storage.saveNotes(filteredNotes);
+    } catch (error) {
+      console.error('Failed to save notes after delete:', error);
+    }
   };
 
 

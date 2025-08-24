@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, TextInput, Image, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { useNotes } from '../context/NotesContext';
+import type { NavigationProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../navigation/AppNavigation';
 import { COLORS } from '../constants/colors';
 import type { RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../navigation/AppNavigation';
 
 type NoteEditorRouteProp = RouteProp<RootStackParamList, 'NoteEditor'>;
 
@@ -15,9 +18,16 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   const imageUri = route.params?.imageUri;
   const [noteText, setNoteText] = useState('');
 
-  const onSave = () => {
-    // TODO: persist note with imageUri and noteText
-    console.log('Saved note', { imageUri, noteText });
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { addNote } = useNotes();
+
+  const onSave = async () => {
+    try {
+      await addNote({ note: noteText.slice(0, 30) || 'Untitled', body: noteText, imageUri });
+      navigation.goBack();
+    } catch (error) {
+      console.error('Failed to save note:', error);
+    }
   };
 
   return (
