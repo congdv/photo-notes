@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
 import { COLORS } from "../constants/colors"
 import { SearchBar } from "../components/SearchBar"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNotes } from '../context/NotesContext';
 import { NoteCard } from '../components/NoteCard';
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -15,6 +15,14 @@ const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { getFilteredNotes, deleteNote, setSearchQuery: setGlobalSearch, layoutMode } = useNotes();
+
+  // debounce updating global search to avoid excessive recomputation
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setGlobalSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   const takePicture = async () => {
     try {
