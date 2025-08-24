@@ -123,43 +123,31 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
               <MaterialCommunityIcons name="camera-plus" size={24} color={COLORS.text} />
             </TouchableOpacity>
           </View>
-          {(imageUris.length || imageUri) ? (
-            <FlatList
-              data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
-              numColumns={3}
-              keyExtractor={(item) => item}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity onPress={() => { setViewerIndex(index); setViewerVisible(true); }} style={styles.gridItem}>
-                  <Image source={{ uri: item }} style={styles.gridImage} resizeMode="cover" />
-                </TouchableOpacity>
-              )}
-              ListFooterComponent={
-                <View style={styles.noteBox}>
-                  <TextInput
-                    placeholder="Write a note..."
-                    placeholderTextColor={COLORS.textSecondary}
-                    multiline
-                    value={noteText}
-                    onChangeText={setNoteText}
-                    style={styles.textInput}
-                  />
-                </View>
-              }
-            />
-          ) : (
-            <View style={styles.noteBox}>
-              <TextInput
-                placeholder="Write a note..."
-                placeholderTextColor={COLORS.textSecondary}
-                multiline
-                value={noteText}
-                onChangeText={setNoteText}
-                style={styles.textInput}
-              />
-            </View>
-          )}
+          <FlatList
+            data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+            numColumns={3}
+            keyExtractor={(item) => item}
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity onPress={() => { setViewerIndex(index); setViewerVisible(true); }} style={styles.gridItem}>
+                <Image source={{ uri: item }} style={styles.gridImage} resizeMode="cover" />
+              </TouchableOpacity>
+            )}
+            ListFooterComponent={
+              <View style={styles.noteBox}>
+                <TextInput
+                  placeholder="Write a note..."
+                  placeholderTextColor={COLORS.textSecondary}
+                  multiline
+                  value={noteText}
+                  onChangeText={setNoteText}
+                  style={styles.textInput}
+                />
+              </View>
+            }
+          />
 
           <Modal visible={viewerVisible} animationType="slide" onRequestClose={() => setViewerVisible(false)}>
             <View style={styles.viewerContainer}>
@@ -192,7 +180,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
           {/* autosave enabled; Save button removed */}
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
