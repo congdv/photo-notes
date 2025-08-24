@@ -1,14 +1,14 @@
 export interface Note {
   id: string;
   note: string;
-  imageUri?: string;
+  imageUris: string[];
   createdAt: number;
   updatedAt: number;
 }
 
 export interface NoteFormData {
   note: string;
-  imageUri?: string;
+  imageUris: string[];
 }
 
 export type LayoutMode = 'grid' | 'list';

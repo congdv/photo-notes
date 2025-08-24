@@ -88,7 +88,8 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
     const now = Date.now();
     const newNote: Note = {
       id: generateUuidV4(),
-      ...noteData,
+  note: noteData.note,
+  imageUris: noteData.imageUris ?? [],
       createdAt: now,
       updatedAt: now,
     };
@@ -107,7 +108,7 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
 
   const updateNote = async (id: string, updates: Partial<Note>) => {
     const updatedNotes = state.notes.map(note =>
-      note.id === id ? { ...note, ...updates } : note
+      note.id === id ? { ...note, ...updates, updatedAt: Date.now() } : note
     );
     dispatch({ type: 'SET_NOTES', payload: updatedNotes });
     try {

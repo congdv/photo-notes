@@ -29,7 +29,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
       const existing = notes.find(n => n.id === routeNoteId);
       if (existing) {
         setNoteText(existing.note || '');
-        setImageUri(existing.imageUri);
+        setImageUri(existing.imageUris?.[0]);
       }
     } else {
       // new note
@@ -42,7 +42,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   useEffect(() => {
     const t = setTimeout(async () => {
       try {
-        const payload = { note: noteText.slice(0, 30) || '', imageUri };
+  const payload = { note: noteText.slice(0, 30) || '', imageUris: imageUri ? [imageUri] : [] };
         if (routeNoteId) {
           await updateNote(routeNoteId, payload);
         } else {

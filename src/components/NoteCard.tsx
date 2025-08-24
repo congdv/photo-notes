@@ -61,9 +61,9 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
       activeOpacity={0.8}
     >
       {/* Image preview */}
-      {note.imageUri ? (
+      {note.imageUris?.[0] ? (
         <Image
-          source={{ uri: note.imageUri }}
+          source={{ uri: note.imageUris[0] }}
           style={[styles.imageContainer, isGrid ? styles.gridImage : styles.listImage]}
           resizeMode="cover"
         />
