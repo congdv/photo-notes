@@ -25,6 +25,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   const [viewerIndex, setViewerIndex] = useState(0);
   const flatListRef = useRef<FlatList<string> | null>(null);
   const [noteText, setNoteText] = useState('');
+  const windowWidth = Dimensions.get('window').width;
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { addNote, updateNote, notes } = useNotes();
@@ -92,12 +93,28 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
     }, 800);
 
     return () => clearTimeout(t);
-  }, [noteText, imageUri, routeNoteId]);
+  }, [noteText, imageUri, imageUris, routeNoteId]);
+
+  // Ensure the fullscreen FlatList scrolls to the right index when viewer opens
+  useEffect(() => {
+    if (viewerVisible) {
+      // small delay to allow modal layout to complete
+      const id = setTimeout(() => {
+        try {
+          flatListRef.current?.scrollToIndex({ index: viewerIndex, animated: false });
+        } catch (err) {
+          // ignore; onScrollToIndexFailed will handle failures
+        }
+      }, 50);
+
+      return () => clearTimeout(id);
+    }
+  }, [viewerVisible, viewerIndex]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <View style={styles.content}>
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="arrow-back" size={24} color={COLORS.text} />
@@ -106,13 +123,41 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
               <MaterialCommunityIcons name="camera-plus" size={24} color={COLORS.text} />
             </TouchableOpacity>
           </View>
-          {imageUri ? (
-            <TouchableOpacity onPress={() => { setViewerIndex(0); setViewerVisible(true); }}>
-              <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
-            </TouchableOpacity>
+          {(imageUris.length || imageUri) ? (
+            <FlatList
+              data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+              numColumns={3}
+              keyExtractor={(item) => item}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity onPress={() => { setViewerIndex(index); setViewerVisible(true); }} style={styles.gridItem}>
+                  <Image source={{ uri: item }} style={styles.gridImage} resizeMode="cover" />
+                </TouchableOpacity>
+              )}
+              ListFooterComponent={
+                <View style={styles.noteBox}>
+                  <TextInput
+                    placeholder="Write a note..."
+                    placeholderTextColor={COLORS.textSecondary}
+                    multiline
+                    value={noteText}
+                    onChangeText={setNoteText}
+                    style={styles.textInput}
+                  />
+                </View>
+              }
+            />
           ) : (
-            <View style={styles.imagePlaceholder}>
-              <Text style={styles.placeholderText}>No image</Text>
+            <View style={styles.noteBox}>
+              <TextInput
+                placeholder="Write a note..."
+                placeholderTextColor={COLORS.textSecondary}
+                multiline
+                value={noteText}
+                onChangeText={setNoteText}
+                style={styles.textInput}
+              />
             </View>
           )}
 
@@ -128,8 +173,15 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
                 ref={flatListRef}
                 initialScrollIndex={viewerIndex}
                 keyExtractor={(item) => item}
+                getItemLayout={(_data, index) => ({ length: windowWidth, offset: windowWidth * index, index })}
+                onScrollToIndexFailed={(info) => {
+                  // fallback: wait briefly and then try to scroll again
+                  setTimeout(() => {
+                    flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                  }, 100);
+                }}
                 renderItem={({ item }) => (
-                  <View style={{ width: Dimensions.get('window').width, justifyContent: 'center', alignItems: 'center' }}>
+                  <View style={{ width: windowWidth, justifyContent: 'center', alignItems: 'center' }}>
                     <Image source={{ uri: item }} style={styles.viewerImage} resizeMode="contain" />
                   </View>
                 )}
@@ -137,19 +189,8 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
             </View>
           </Modal>
 
-          <View style={styles.noteBox}>
-            <TextInput
-              placeholder="Write a note..."
-              placeholderTextColor={COLORS.textSecondary}
-              multiline
-              value={noteText}
-              onChangeText={setNoteText}
-              style={styles.textInput}
-            />
-          </View>
-
           {/* autosave enabled; Save button removed */}
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -191,6 +232,8 @@ const styles = StyleSheet.create({
   viewerContainer: { flex: 1, backgroundColor: '#000' },
   viewerClose: { position: 'absolute', top: 40, right: 20, zIndex: 2, padding: 8 },
   viewerImage: { width: '100%', height: '100%' },
+  gridItem: { flex: 1, margin: 6, aspectRatio: 1, borderRadius: 10, overflow: 'hidden' },
+  gridImage: { width: '100%', height: '100%' },
 });
 
 export default NoteEditorScreen;
