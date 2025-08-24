@@ -10,6 +10,7 @@ import type { RootStackParamList } from '../navigation/AppNavigation';
 import { COLORS } from '../constants/styles';
 import type { RouteProp } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import ImageGrid from '../components/ImageGrid';
 
 type NoteEditorRouteProp = RouteProp<RootStackParamList, 'NoteEditor'>;
 
@@ -114,7 +115,12 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <View style={styles.content}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="arrow-back" size={24} color={COLORS.text} />
@@ -123,64 +129,53 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
               <MaterialCommunityIcons name="camera-plus" size={24} color={COLORS.text} />
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
-            numColumns={3}
-            keyExtractor={(item) => item}
-            keyboardShouldPersistTaps="always"
-            keyboardDismissMode="on-drag"
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity onPress={() => { setViewerIndex(index); setViewerVisible(true); }} style={styles.gridItem}>
-                <Image source={{ uri: item }} style={styles.gridImage} resizeMode="cover" />
-              </TouchableOpacity>
-            )}
-            ListFooterComponent={
-              <View style={styles.noteBox}>
-                <TextInput
-                  placeholder="Write a note..."
-                  placeholderTextColor={COLORS.textSecondary}
-                  multiline
-                  value={noteText}
-                  onChangeText={setNoteText}
-                  style={styles.textInput}
-                />
-              </View>
-            }
+
+          <ImageGrid
+            images={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+            onImagePress={(index) => { setViewerIndex(index); setViewerVisible(true); }}
           />
 
-          <Modal visible={viewerVisible} animationType="slide" onRequestClose={() => setViewerVisible(false)}>
-            <View style={styles.viewerContainer}>
-              <TouchableOpacity style={styles.viewerClose} onPress={() => setViewerVisible(false)}>
-                <Text style={{ color: '#fff', fontSize: 18 }}>Close</Text>
-              </TouchableOpacity>
-              <FlatList
-                data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
-                horizontal
-                pagingEnabled
-                ref={flatListRef}
-                initialScrollIndex={viewerIndex}
-                keyExtractor={(item) => item}
-                getItemLayout={(_data, index) => ({ length: windowWidth, offset: windowWidth * index, index })}
-                onScrollToIndexFailed={(info) => {
-                  // fallback: wait briefly and then try to scroll again
-                  setTimeout(() => {
-                    flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
-                  }, 100);
-                }}
-                renderItem={({ item }) => (
-                  <View style={{ width: windowWidth, justifyContent: 'center', alignItems: 'center' }}>
-                    <Image source={{ uri: item }} style={styles.viewerImage} resizeMode="contain" />
-                  </View>
-                )}
-              />
-            </View>
-          </Modal>
+          <View style={styles.noteBox}>
+            <TextInput
+              placeholder="Write a note..."
+              placeholderTextColor={COLORS.textSecondary}
+              multiline
+              value={noteText}
+              onChangeText={setNoteText}
+              style={styles.textInput}
+            />
+          </View>
+        </ScrollView>
 
-          {/* autosave enabled; Save button removed */}
-        </View>
+        <Modal visible={viewerVisible} animationType="slide" onRequestClose={() => setViewerVisible(false)}>
+          <View style={styles.viewerContainer}>
+            <TouchableOpacity style={styles.viewerClose} onPress={() => setViewerVisible(false)}>
+              <Text style={{ color: '#fff', fontSize: 18 }}>Close</Text>
+            </TouchableOpacity>
+            <FlatList
+              data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+              horizontal
+              pagingEnabled
+              ref={flatListRef}
+              initialScrollIndex={viewerIndex}
+              keyExtractor={(item) => item}
+              getItemLayout={(_data, index) => ({ length: windowWidth, offset: windowWidth * index, index })}
+              onScrollToIndexFailed={(info) => {
+                // fallback: wait briefly and then try to scroll again
+                setTimeout(() => {
+                  flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                }, 100);
+              }}
+              renderItem={({ item }) => (
+                <View style={{ width: windowWidth, justifyContent: 'center', alignItems: 'center' }}>
+                  <Image source={{ uri: item }} style={styles.viewerImage} resizeMode="contain" />
+                </View>
+              )}
+            />
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 };
 
@@ -220,8 +215,6 @@ const styles = StyleSheet.create({
   viewerContainer: { flex: 1, backgroundColor: '#000' },
   viewerClose: { position: 'absolute', top: 40, right: 20, zIndex: 2, padding: 8 },
   viewerImage: { width: '100%', height: '100%' },
-  gridItem: { flex: 1, margin: 6, aspectRatio: 1, borderRadius: 10, overflow: 'hidden' },
-  gridImage: { width: '100%', height: '100%' },
 });
 
 export default NoteEditorScreen;
