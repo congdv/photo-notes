@@ -88,8 +88,8 @@ export const NotesProvider: React.FC<NotesProviderProps> = ({ children }) => {
     const now = Date.now();
     const newNote: Note = {
       id: generateUuidV4(),
-  note: noteData.note,
-  imageUris: noteData.imageUris ?? [],
+      note: noteData.note,
+      imageUris: noteData.imageUris ?? [],
       createdAt: now,
       updatedAt: now,
     };
