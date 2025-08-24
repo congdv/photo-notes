@@ -1,13 +1,62 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
 import { COLORS } from "../constants/colors"
 import { SearchBar } from "../components/SearchBar"
 import { useState } from "react"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../navigation/AppNavigation';
 import { EmptyNotes } from "../components/EmptyNotes"
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 const HomeScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [imageUri, setImageUri] = useState<string | null>(null);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const takePicture = async () => {
+    try {
+      // Ensure we have camera permission (handle current and legacy API shapes)
+      const currentPerm = await ImagePicker.getCameraPermissionsAsync();
+      let status = currentPerm.status;
+      if (status !== 'granted') {
+        const requestPerm = await ImagePicker.requestCameraPermissionsAsync();
+        status = requestPerm.status;
+      }
+
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Camera permission is required to take photos');
+        return;
+      }
+
+      // Use a minimal options object to avoid native-side type mismatches
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: false,
+        quality: 1.0,
+      });
+
+      // Log result for easier debugging in case shape differs across SDKs
+      console.log('launchCameraAsync result:', result);
+
+      // Support both new ({ canceled, assets: [{ uri }] }) and old ({ cancelled, uri }) shapes
+      // New shape (recommended): result.canceled === false && result.assets?.[0]?.uri
+      // Old shape (legacy): result.cancelled === false && result.uri
+      const assetUri = (result as any)?.assets?.[0]?.uri ?? (result as any)?.uri;
+
+      if (assetUri) {
+        setImageUri(assetUri);
+        // navigate to note editor with the captured image
+        navigation.navigate('NoteEditor', { imageUri: assetUri });
+      } else {
+        // user cancelled or no uri available
+        console.log('No image returned from camera (user cancelled or unsupported shape).', result);
+      }
+    } catch (error) {
+      console.error('Error taking picture:', error);
+      Alert.alert('Error', 'Failed to take picture');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -24,7 +73,7 @@ const HomeScreen = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={EmptyNotes}
       />
-      <TouchableOpacity style={styles.fab} onPress={() => { }}>
+      <TouchableOpacity style={styles.fab} onPress={takePicture}>
         <Ionicons name="add" size={24} color={COLORS.surface} />
       </TouchableOpacity>
     </SafeAreaView>
