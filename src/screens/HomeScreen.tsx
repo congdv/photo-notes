@@ -1,5 +1,5 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
-import { COLORS } from "../constants/colors"
+import { COLORS } from "../constants/styles"
 import { SearchBar } from "../components/SearchBar"
 import { useState, useEffect } from "react"
 import { useNotes } from '../context/NotesContext';

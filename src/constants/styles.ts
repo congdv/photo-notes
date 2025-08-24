@@ -9,3 +9,11 @@ export const COLORS = {
   error: '#ef4444',          // Red 500 (unchanged)
   success: '#22c55e',        // Green 500 (unchanged)
 };
+
+export const SPACING = {
+  small: 8,
+  xsmall: 12,
+  medium: 16,
+  large: 24,
+  xlarge: 32
+};

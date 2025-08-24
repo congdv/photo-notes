@@ -1,7 +1,7 @@
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View, Text } from "react-native";
-import { COLORS } from "../constants/colors";
+import { COLORS } from "../constants/styles";
 
 interface EmptyNotesProps {
 

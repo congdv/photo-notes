@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Note, LayoutMode } from '../types';
-import { COLORS } from '../constants/colors';
+import { COLORS } from '../constants/styles';
 
 interface NoteCardProps {
   note: Note;
@@ -103,7 +103,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
 const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
-    padding: 16,
     marginBottom: 12,
     elevation: 2,
     shadowColor: '#000',
@@ -119,24 +118,15 @@ const styles = StyleSheet.create({
   listCard: {
     width: '100%',
   },
-  pinnedCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-  },
-  pinIndicator: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-  },
   imageContainer: {
     marginBottom: 12,
-    borderRadius: 8,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
     overflow: 'hidden',
     backgroundColor: 'rgba(0,0,0,0.05)',
   },
   gridImage: {
-    height: 80,
+    height: 250,
   },
   listImage: {
     height: 60,
@@ -153,6 +143,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
     color: COLORS.text,
+    paddingHorizontal: 16
   },
   gridTitle: {
     fontSize: 16,
@@ -172,6 +163,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     gap: 8,
   },
   actionButton: {
