@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, Image, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList, Dimensions } from 'react-native';
+import { View, TextInput, Image, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList, Dimensions, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, StackActions } from '@react-navigation/native';
@@ -8,6 +9,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigation';
 import { COLORS } from '../constants/styles';
 import type { RouteProp } from '@react-navigation/native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type NoteEditorRouteProp = RouteProp<RootStackParamList, 'NoteEditor'>;
 
@@ -26,6 +28,32 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { addNote, updateNote, notes } = useNotes();
+
+  const addPhoto = async () => {
+    try {
+      const currentPerm = await ImagePicker.getCameraPermissionsAsync();
+      let status = currentPerm.status;
+      if (status !== 'granted') {
+        const requestPerm = await ImagePicker.requestCameraPermissionsAsync();
+        status = requestPerm.status;
+      }
+
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Camera permission is required to take photos');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 0.8 });
+      const assetUri = (result as any)?.assets?.[0]?.uri ?? (result as any)?.uri;
+      if (assetUri) {
+        setImageUris(prev => [assetUri, ...prev]);
+        setImageUri(assetUri);
+      }
+    } catch (error) {
+      console.error('Failed to add photo:', error);
+      Alert.alert('Error', 'Failed to take photo');
+    }
+  };
 
   // Load existing note when editing
   useEffect(() => {
@@ -73,6 +101,9 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => addPhoto()} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <MaterialCommunityIcons name="camera-plus" size={24} color={COLORS.text} />
             </TouchableOpacity>
           </View>
           {imageUri ? (
@@ -155,7 +186,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: { color: COLORS.surface, fontWeight: '600' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   backButton: { marginLeft: -4, padding: 4 },
   viewerContainer: { flex: 1, backgroundColor: '#000' },
   viewerClose: { position: 'absolute', top: 40, right: 20, zIndex: 2, padding: 8 },
