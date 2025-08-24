@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity, Modal, FlatList, Dimensions } from 'react-native';
+import { COLORS } from '../constants/styles';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ImageViewerProps {
   images: string[];
@@ -31,9 +33,12 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ images, visible, initialIndex
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.viewerContainer}>
-        <TouchableOpacity style={styles.viewerClose} onPress={onClose}>
-          <Text style={styles.closeText}>Close</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={onClose} style={styles.backButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.background} />
+          </TouchableOpacity>
+
+        </View>
         <FlatList
           data={images}
           horizontal
@@ -64,6 +69,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000'
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
   viewerClose: {
     position: 'absolute',
     top: 40,
@@ -83,6 +95,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%'
   },
+  backButton: { marginLeft: -4, padding: 4 },
 });
 
 export default ImageViewer;
