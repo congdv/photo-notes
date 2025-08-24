@@ -2,6 +2,8 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from "react
 import { COLORS } from "../constants/colors"
 import { SearchBar } from "../components/SearchBar"
 import { useState } from "react"
+import { useNotes } from '../context/NotesContext';
+import { NoteCard } from '../components/NoteCard';
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/AppNavigation';
@@ -11,8 +13,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [imageUri, setImageUri] = useState<string | null>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { getFilteredNotes, deleteNote, setSearchQuery: setGlobalSearch, layoutMode } = useNotes();
 
   const takePicture = async () => {
     try {
@@ -44,7 +46,6 @@ const HomeScreen = () => {
       const assetUri = (result as any)?.assets?.[0]?.uri ?? (result as any)?.uri;
 
       if (assetUri) {
-        setImageUri(assetUri);
         // navigate to note editor with the captured image
         navigation.navigate('NoteEditor', { imageUri: assetUri });
       } else {
@@ -67,9 +68,16 @@ const HomeScreen = () => {
         />
       </View>
       <FlatList
-        data={[]}
-        renderItem={() => null}
-        keyExtractor={(_, index) => index.toString()}
+        data={getFilteredNotes()}
+        renderItem={({ item }) => (
+          <NoteCard
+            note={item}
+            layoutMode={layoutMode}
+            onPress={() => navigation.navigate('NoteEditor', { noteId: item.id })}
+            onDelete={() => deleteNote(item.id)}
+          />
+        )}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={EmptyNotes}
       />
