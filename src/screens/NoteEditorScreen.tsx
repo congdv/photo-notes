@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, Image, StyleSheet, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList, Dimensions, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { COLORS } from '../constants/styles';
 import type { RouteProp } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import ImageGrid from '../components/ImageGrid';
+import ImageViewer from '../components/ImageViewer';
 
 type NoteEditorRouteProp = RouteProp<RootStackParamList, 'NoteEditor'>;
 
@@ -24,9 +25,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
-  const flatListRef = useRef<FlatList<string> | null>(null);
   const [noteText, setNoteText] = useState('');
-  const windowWidth = Dimensions.get('window').width;
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { addNote, updateNote, notes } = useNotes();
@@ -96,22 +95,6 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
     return () => clearTimeout(t);
   }, [noteText, imageUri, imageUris, routeNoteId]);
 
-  // Ensure the fullscreen FlatList scrolls to the right index when viewer opens
-  useEffect(() => {
-    if (viewerVisible) {
-      // small delay to allow modal layout to complete
-      const id = setTimeout(() => {
-        try {
-          flatListRef.current?.scrollToIndex({ index: viewerIndex, animated: false });
-        } catch (err) {
-          // ignore; onScrollToIndexFailed will handle failures
-        }
-      }, 50);
-
-      return () => clearTimeout(id);
-    }
-  }, [viewerVisible, viewerIndex]);
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -149,33 +132,12 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
           </View>
         </ScrollView>
 
-        <Modal visible={viewerVisible} animationType="slide" onRequestClose={() => setViewerVisible(false)}>
-          <View style={styles.viewerContainer}>
-            <TouchableOpacity style={styles.viewerClose} onPress={() => setViewerVisible(false)}>
-              <Text style={{ color: '#fff', fontSize: 18 }}>Close</Text>
-            </TouchableOpacity>
-            <FlatList
-              data={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
-              horizontal
-              pagingEnabled
-              ref={flatListRef}
-              initialScrollIndex={viewerIndex}
-              keyExtractor={(item) => item}
-              getItemLayout={(_data, index) => ({ length: windowWidth, offset: windowWidth * index, index })}
-              onScrollToIndexFailed={(info) => {
-                // fallback: wait briefly and then try to scroll again
-                setTimeout(() => {
-                  flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
-                }, 100);
-              }}
-              renderItem={({ item }) => (
-                <View style={{ width: windowWidth, justifyContent: 'center', alignItems: 'center' }}>
-                  <Image source={{ uri: item }} style={styles.viewerImage} resizeMode="contain" />
-                </View>
-              )}
-            />
-          </View>
-        </Modal>
+        <ImageViewer
+          images={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+          visible={viewerVisible}
+          initialIndex={viewerIndex}
+          onClose={() => setViewerVisible(false)}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -223,9 +185,6 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
   },
   backButton: { marginLeft: -4, padding: 4 },
-  viewerContainer: { flex: 1, backgroundColor: '#000' },
-  viewerClose: { position: 'absolute', top: 40, right: 20, zIndex: 2, padding: 8 },
-  viewerImage: { width: '100%', height: '100%' },
 });
 
 export default NoteEditorScreen;
