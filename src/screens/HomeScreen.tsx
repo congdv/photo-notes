@@ -1,4 +1,5 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
+import { FlashList } from "@shopify/flash-list";
 import { COLORS } from "../constants/styles"
 import { SearchBar } from "../components/SearchBar"
 import { useState, useEffect } from "react"
@@ -82,23 +83,24 @@ const HomeScreen = () => {
           onClear={() => setSearchQuery('')}
         />
       </View>
-      <FlatList
-        data={getFilteredNotes()}
-        renderItem={({ item }) => (
-          <NoteCard
-            note={item}
-            layoutMode={layoutMode}
-            onPress={() => navigation.navigate('NoteEditor', { noteId: item.id })}
-            onDelete={() => deleteNote(item.id)}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={EmptyNotes}
-        numColumns={layoutMode === 'grid' ? 2 : 1}
-        columnWrapperStyle={layoutMode === 'grid' ? { justifyContent: 'space-between', paddingHorizontal: 16 } : undefined}
-        contentContainerStyle={layoutMode === 'grid' ? { paddingTop: 12, paddingBottom: 24 } : { paddingBottom: 24 }}
-      />
+      <View style={{ flex: 1 }}>
+        <FlashList
+          data={getFilteredNotes()}
+          renderItem={({ item }) => (
+            <NoteCard
+              note={item}
+              layoutMode={layoutMode}
+              onPress={() => navigation.navigate('NoteEditor', { noteId: item.id })}
+              onDelete={() => deleteNote(item.id)}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={EmptyNotes}
+          numColumns={layoutMode === 'grid' ? 2 : 1}
+          contentContainerStyle={layoutMode === 'grid' ? { paddingTop: 12, paddingBottom: 24, paddingHorizontal: 16 } : { paddingBottom: 24 }}
+        />
+      </View>
       <TouchableOpacity style={styles.fab} onPress={takePicture}>
         <Ionicons name="add" size={24} color={COLORS.surface} />
       </TouchableOpacity>
