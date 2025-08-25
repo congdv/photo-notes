@@ -21,7 +21,6 @@ type Props = {
 
 const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   const routeNoteId = route.params?.noteId;
-  const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -47,8 +46,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
       const result = await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 0.8 });
       const assetUri = (result as any)?.assets?.[0]?.uri ?? (result as any)?.uri;
       if (assetUri) {
-        setImageUris(prev => [assetUri, ...prev]);
-        setImageUri(assetUri);
+        setImageUris(prev => [...prev, assetUri]);
       }
     } catch (error) {
       console.error('Failed to add photo:', error);
@@ -63,13 +61,11 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
       if (existing) {
         setNoteText(existing.note || '');
         setImageUris(existing.imageUris ?? []);
-        setImageUri(existing.imageUris?.[0]);
       }
     } else {
       // new note
       setNoteText('');
       setImageUris([]);
-      setImageUri(undefined);
     }
   }, [routeNoteId, notes]);
 
@@ -77,7 +73,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   useEffect(() => {
     const t = setTimeout(async () => {
       try {
-        const payload = { note: noteText.slice(0, 30) || '', imageUris: imageUris.length ? imageUris : imageUri ? [imageUri] : [] };
+        const payload = { note: noteText.slice(0, 30) || '', imageUris: imageUris.length ? imageUris : [] };
         if (routeNoteId) {
           await updateNote(routeNoteId, payload);
         } else {
@@ -93,7 +89,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
     }, 800);
 
     return () => clearTimeout(t);
-  }, [noteText, imageUri, imageUris, routeNoteId]);
+  }, [noteText, imageUris, routeNoteId]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -116,7 +112,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
           showsVerticalScrollIndicator={false}
         >
           <ImageGrid
-            images={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+            images={imageUris.length ? imageUris : []}
             onImagePress={(index) => { setViewerIndex(index); setViewerVisible(true); }}
           />
 
@@ -133,7 +129,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
         </ScrollView>
 
         <ImageViewer
-          images={imageUris.length ? imageUris : (imageUri ? [imageUri] : [])}
+          images={imageUris.length ? imageUris : []}
           visible={viewerVisible}
           initialIndex={viewerIndex}
           onClose={() => setViewerVisible(false)}
