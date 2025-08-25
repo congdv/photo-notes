@@ -86,6 +86,7 @@ const HomeScreen = () => {
       <View style={{ flex: 1 }}>
         <FlashList
           data={getFilteredNotes()}
+          masonry
           renderItem={({ item }) => (
             <NoteCard
               note={item}
