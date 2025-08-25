@@ -73,7 +73,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   useEffect(() => {
     const t = setTimeout(async () => {
       try {
-        const payload = { note: noteText.slice(0, 30) || '', imageUris: imageUris.length ? imageUris : [] };
+        const payload = { note: noteText || '', imageUris: imageUris.length ? imageUris : [] };
         if (routeNoteId) {
           await updateNote(routeNoteId, payload);
         } else {
@@ -124,6 +124,8 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
               value={noteText}
               onChangeText={setNoteText}
               style={styles.textInput}
+              scrollEnabled={true}
+              textAlignVertical="top"
             />
           </View>
         </ScrollView>
@@ -161,7 +163,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  textInput: { color: COLORS.text, fontSize: 16, textAlignVertical: 'top' },
+  textInput: {
+    color: COLORS.text,
+    fontSize: 16,
+    textAlignVertical: 'top',
+    flex: 1,
+    maxHeight: 200,
+  },
   saveButton: {
     marginTop: 20,
     backgroundColor: COLORS.primary,

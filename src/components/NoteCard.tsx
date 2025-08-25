@@ -79,8 +79,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
           </Text>
         ) : null}
 
-
-
       </View>
 
       {/* Action buttons (only delete for now) */}
@@ -88,7 +86,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
         {/* Timestamp */}
         <Text style={styles.timestamp}>{formatDate(note.updatedAt)}</Text>
         <TouchableOpacity
-          style={styles.actionButton}
           onPress={handleDelete}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
@@ -142,7 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
     color: COLORS.text,
-    paddingHorizontal: 16
+    paddingHorizontal: 12
   },
   gridTitle: {
     fontSize: 16,
@@ -162,11 +159,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 12,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 12,
+    paddingBottom: 12,
     gap: 8,
   },
-  actionButton: {
-    padding: 4,
-  },
+
 }); 
