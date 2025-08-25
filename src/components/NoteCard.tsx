@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Note, LayoutMode } from '../types';
 import { COLORS } from '../constants/styles';
+import ImageGrid from './ImageGrid';
 
 interface NoteCardProps {
   note: Note;
@@ -61,13 +62,11 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
       activeOpacity={0.8}
     >
       {/* Image preview */}
-      {note.imageUris?.[0] ? (
-        <Image
-          source={{ uri: note.imageUris[0] }}
-          style={[styles.imageContainer, isGrid ? styles.gridImage : styles.listImage]}
-          resizeMode="cover"
-        />
-      ) : null}
+      <ImageGrid
+        images={note.imageUris}
+        mode="preview"
+        maxImages={6}
+      />
 
       {/* Content */}
       <View style={styles.content}>
@@ -102,7 +101,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
+    borderRadius: 8,
     marginBottom: 12,
     elevation: 2,
     shadowColor: '#000',
