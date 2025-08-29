@@ -44,7 +44,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, 
         styles.card,
         isGrid ? styles.gridCard : styles.listCard,
         {
-          backgroundColor: selected ? COLORS.primary + '20' : COLORS.surface,
+          backgroundColor: COLORS.surface,
           borderColor: selected ? COLORS.primary : 'transparent',
           borderWidth: selected ? 2 : 0,
         },
@@ -60,14 +60,6 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, 
         maxImages={6}
       />
 
-      {/* Selection overlay */}
-      {selected && (
-        <View style={styles.selectionOverlay}>
-          <View style={styles.checkmarkContainer}>
-            <Text style={styles.checkmark}>✓</Text>
-          </View>
-        </View>
-      )}
 
       {/* Content */}
       <View style={styles.content}>
@@ -82,8 +74,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, 
 
       </View>
 
-      {/* Simplified actions - just timestamp now */}
-      <View style={styles.actions}>
+      <View style={styles.footer}>
         <Text style={styles.timestamp}>{formatDate(note.updatedAt)}</Text>
       </View>
     </TouchableOpacity>
@@ -93,7 +84,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, 
 const styles = StyleSheet.create({
   card: {
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 8,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -127,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    flex: 1,
+    // flex: 1,
   },
   title: {
     fontWeight: '600',
@@ -149,10 +140,9 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 8,
   },
-  actions: {
+  footer: {
     paddingHorizontal: 12,
     paddingBottom: 12,
-    marginTop: 8,
   },
   selectionOverlay: {
     position: 'absolute',
@@ -164,24 +154,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  checkmarkContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  checkmark: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 
 }); 
