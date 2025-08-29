@@ -21,6 +21,7 @@ const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cabVisible, setCabVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [selectedNotes, setSelectedNotes] = useState<Note[]>([]);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { getFilteredNotes, deleteNote, setSearchQuery: setGlobalSearch, layoutMode, addNote } = useNotes();
 
@@ -81,31 +82,68 @@ const HomeScreen = () => {
     }
   };
 
+  // Helper functions for multiple selection
+  const isNoteSelected = (noteId: string) => {
+    return selectedNotes.some(note => note.id === noteId);
+  };
+
+  const toggleNoteSelection = (note: Note) => {
+    if (isNoteSelected(note.id)) {
+      // Remove from selection
+      const newSelection = selectedNotes.filter(n => n.id !== note.id);
+      setSelectedNotes(newSelection);
+      if (newSelection.length === 0) {
+        setCabVisible(false);
+      }
+    } else {
+      // Add to selection
+      setSelectedNotes(prev => [...prev, note]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const allNotes = getFilteredNotes();
+    setSelectedNotes(allNotes);
+  };
+
   const handleNoteLongPress = (note: Note) => {
     // Provide haptic feedback to indicate long press was detected
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSelectedNote(note);
-    setCabVisible(true);
+
+    if (selectedNotes.length === 0) {
+      // First selection
+      setSelectedNotes([note]);
+      setSelectedNote(note); // Keep for backward compatibility
+      setCabVisible(true);
+    } else {
+      // Additional selection
+      toggleNoteSelection(note);
+    }
   };
 
   const handleCloseCab = () => {
     setCabVisible(false);
     setSelectedNote(null);
+    setSelectedNotes([]);
   };
 
   const handleDeleteNote = async () => {
-    if (!selectedNote) return;
+    if (selectedNotes.length === 0) return;
+
+    const noteText = selectedNotes.length === 1
+      ? 'this note'
+      : `these ${selectedNotes.length} notes`;
 
     Alert.alert(
-      'Delete Note',
-      'Are you sure you want to delete this note?',
+      'Delete Notes',
+      `Are you sure you want to delete ${noteText}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            deleteNote(selectedNote.id);
+            selectedNotes.forEach(note => deleteNote(note.id));
             handleCloseCab();
           }
         },
@@ -114,11 +152,11 @@ const HomeScreen = () => {
   };
 
   const handleNotePress = (note: Note) => {
-    if (selectedNote?.id === note.id) {
-      // If tapping on the selected note, close the contextual action bar
-      handleCloseCab();
+    if (selectedNotes.length > 0) {
+      // In selection mode, toggle selection
+      toggleNoteSelection(note);
     } else {
-      // Navigate to edit the note
+      // Normal mode, navigate to edit
       navigation.navigate('NoteEditor', { noteId: note.id });
     }
   };
@@ -135,7 +173,7 @@ const HomeScreen = () => {
         {/* Contextual Action Bar - overlays on SearchBar */}
         <ContextualActionBar
           visible={cabVisible}
-          selectedNote={selectedNote}
+          selectedNotes={selectedNotes}
           onClose={handleCloseCab}
           onDelete={handleDeleteNote}
         />
@@ -149,7 +187,7 @@ const HomeScreen = () => {
             <NoteCard
               note={item}
               layoutMode={layoutMode}
-              selected={selectedNote?.id === item.id}
+              selected={isNoteSelected(item.id)}
               onPress={() => handleNotePress(item)}
               onLongPress={() => handleNoteLongPress(item)}
             />

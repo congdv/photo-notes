@@ -14,14 +14,14 @@ import { Note } from '../types';
 
 interface ContextualActionBarProps {
   visible: boolean;
-  selectedNote: Note | null;
+  selectedNotes: Note[];
   onClose: () => void;
   onDelete: () => void;
 }
 
 export const ContextualActionBar: React.FC<ContextualActionBarProps> = ({
   visible,
-  selectedNote,
+  selectedNotes,
   onClose,
   onDelete,
 }) => {
@@ -78,7 +78,7 @@ export const ContextualActionBar: React.FC<ContextualActionBarProps> = ({
         ]}
         pointerEvents={visible ? 'auto' : 'none'}
       >
-        {visible && selectedNote && (
+        {visible && selectedNotes.length > 0 && (
           <>
             {/* Left side - Close and title */}
             <View style={styles.leftSection}>
@@ -89,12 +89,13 @@ export const ContextualActionBar: React.FC<ContextualActionBarProps> = ({
               >
                 <Ionicons name="close" size={24} color="white" />
               </TouchableOpacity>
-              <Text style={styles.title}>1</Text>
+              <Text style={styles.title}>
+                {selectedNotes.length}
+              </Text>
             </View>
 
             {/* Right side - Actions */}
             <View style={styles.rightSection}>
-
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={onDelete}
