@@ -21,10 +21,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.congdao.photonotes"
+      "package": "com.congdao.photonotes",
+      "statusBar": {
+        "barStyle": "dark-content",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "94cbb990-906d-4deb-85e0-9a28389dcf4b"
+      }
     }
   }
 }

@@ -11,7 +11,7 @@ export default function App() {
       <NotesProvider>
         <AppNavigation />
       </NotesProvider>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" backgroundColor="#ffffff" translucent={false} />
     </SafeAreaProvider>
   );
 }
