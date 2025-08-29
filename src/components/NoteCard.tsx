@@ -15,12 +15,13 @@ interface NoteCardProps {
   onPress?: () => void;
   onLongPress?: () => void;
   layoutMode: LayoutMode;
+  selected?: boolean;
 }
 
 const { width } = Dimensions.get('window');
 const GRID_ITEM_WIDTH = (width - 48) / 2; // 2 columns with margins
 
-export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, layoutMode }) => {
+export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, layoutMode, selected = false }) => {
   const isGrid = layoutMode === 'grid';
 
   const formatDate = (timestamp: number) => {
@@ -42,7 +43,11 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, 
       style={[
         styles.card,
         isGrid ? styles.gridCard : styles.listCard,
-        { backgroundColor: COLORS.surface },
+        {
+          backgroundColor: selected ? COLORS.primary + '20' : COLORS.surface,
+          borderColor: selected ? COLORS.primary : 'transparent',
+          borderWidth: selected ? 2 : 0,
+        },
       ]}
       onPress={onPress}
       onLongPress={onLongPress}
@@ -54,6 +59,15 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, 
         mode="preview"
         maxImages={6}
       />
+
+      {/* Selection overlay */}
+      {selected && (
+        <View style={styles.selectionOverlay}>
+          <View style={styles.checkmarkContainer}>
+            <Text style={styles.checkmark}>✓</Text>
+          </View>
+        </View>
+      )}
 
       {/* Content */}
       <View style={styles.content}>
@@ -139,6 +153,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 12,
     marginTop: 8,
+  },
+  selectionOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmarkContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  checkmark: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 
 }); 

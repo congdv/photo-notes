@@ -113,10 +113,14 @@ const HomeScreen = () => {
     );
   };
 
-  const handleEditNote = () => {
-    if (!selectedNote) return;
-    navigation.navigate('NoteEditor', { noteId: selectedNote.id });
-    handleCloseCab();
+  const handleNotePress = (note: Note) => {
+    if (selectedNote?.id === note.id) {
+      // If tapping on the selected note, close the contextual action bar
+      handleCloseCab();
+    } else {
+      // Navigate to edit the note
+      navigation.navigate('NoteEditor', { noteId: note.id });
+    }
   };
 
   return (
@@ -145,7 +149,8 @@ const HomeScreen = () => {
             <NoteCard
               note={item}
               layoutMode={layoutMode}
-              onPress={() => navigation.navigate('NoteEditor', { noteId: item.id })}
+              selected={selectedNote?.id === item.id}
+              onPress={() => handleNotePress(item)}
               onLongPress={() => handleNoteLongPress(item)}
             />
           )}
