@@ -1,20 +1,26 @@
-import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native"
-import { FlashList } from "@shopify/flash-list";
-import { COLORS } from "../constants/styles"
-import { SearchBar } from "../components/SearchBar"
-import { useState, useEffect } from "react"
-import { useNotes } from '../context/NotesContext';
-import { NoteCard } from '../components/NoteCard';
-import { SafeAreaView } from "react-native-safe-area-context"
-import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../navigation/AppNavigation';
-import { EmptyNotes } from "../components/EmptyNotes"
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import { ShareTestingPanel } from "../components/ShareTestingPanel";
+import * as Haptics from 'expo-haptics';
+
+import { SearchBar } from '../components/SearchBar';
+import { NoteCard } from '../components/NoteCard';
+import { EmptyNotes } from '../components/EmptyNotes';
+import { ContextualActionBar } from '../components/ContextualActionBar';
+import { ShareTestingPanel } from '../components/ShareTestingPanel';
+import { useNotes } from '../context/NotesContext';
+import { COLORS } from '../constants/styles';
+import type { RootStackParamList } from '../navigation/AppNavigation';
+import type { Note } from '../types';
 
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [cabVisible, setCabVisible] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { getFilteredNotes, deleteNote, setSearchQuery: setGlobalSearch, layoutMode, addNote } = useNotes();
 
@@ -75,6 +81,44 @@ const HomeScreen = () => {
     }
   };
 
+  const handleNoteLongPress = (note: Note) => {
+    // Provide haptic feedback to indicate long press was detected
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSelectedNote(note);
+    setCabVisible(true);
+  };
+
+  const handleCloseCab = () => {
+    setCabVisible(false);
+    setSelectedNote(null);
+  };
+
+  const handleDeleteNote = async () => {
+    if (!selectedNote) return;
+
+    Alert.alert(
+      'Delete Note',
+      'Are you sure you want to delete this note?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteNote(selectedNote.id);
+            handleCloseCab();
+          }
+        },
+      ]
+    );
+  };
+
+  const handleEditNote = () => {
+    if (!selectedNote) return;
+    navigation.navigate('NoteEditor', { noteId: selectedNote.id });
+    handleCloseCab();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -83,7 +127,16 @@ const HomeScreen = () => {
           onChangeText={setSearchQuery}
           onClear={() => setSearchQuery('')}
         />
+
+        {/* Contextual Action Bar - overlays on SearchBar */}
+        <ContextualActionBar
+          visible={cabVisible}
+          selectedNote={selectedNote}
+          onClose={handleCloseCab}
+          onDelete={handleDeleteNote}
+        />
       </View>
+
       <View style={{ flex: 1 }}>
         <FlashList
           data={getFilteredNotes()}
@@ -93,7 +146,7 @@ const HomeScreen = () => {
               note={item}
               layoutMode={layoutMode}
               onPress={() => navigation.navigate('NoteEditor', { noteId: item.id })}
-              onDelete={() => deleteNote(item.id)}
+              onLongPress={() => handleNoteLongPress(item)}
             />
           )}
           keyExtractor={(item) => item.id}
@@ -109,6 +162,7 @@ const HomeScreen = () => {
 
       {/* Development Testing Panel */}
       <ShareTestingPanel />
+
     </SafeAreaView>
   )
 }
@@ -119,6 +173,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background
   },
   header: {
+    position: 'relative',
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,

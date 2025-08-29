@@ -5,10 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Alert,
-  Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Note, LayoutMode } from '../types';
 import { COLORS } from '../constants/styles';
 import ImageGrid from './ImageGrid';
@@ -16,26 +13,15 @@ import ImageGrid from './ImageGrid';
 interface NoteCardProps {
   note: Note;
   onPress?: () => void;
-  onDelete?: () => void;
+  onLongPress?: () => void;
   layoutMode: LayoutMode;
 }
 
 const { width } = Dimensions.get('window');
 const GRID_ITEM_WIDTH = (width - 48) / 2; // 2 columns with margins
 
-export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, layoutMode }) => {
+export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onLongPress, layoutMode }) => {
   const isGrid = layoutMode === 'grid';
-
-  const handleDelete = () => {
-    Alert.alert(
-      'Delete Note',
-      'Are you sure you want to delete this note?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: onDelete },
-      ]
-    );
-  };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -59,6 +45,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
         { backgroundColor: COLORS.surface },
       ]}
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.8}
     >
       {/* Image preview */}
@@ -81,16 +68,9 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress, onDelete, lay
 
       </View>
 
-      {/* Action buttons (only delete for now) */}
+      {/* Simplified actions - just timestamp now */}
       <View style={styles.actions}>
-        {/* Timestamp */}
         <Text style={styles.timestamp}>{formatDate(note.updatedAt)}</Text>
-        <TouchableOpacity
-          onPress={handleDelete}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="trash-outline" size={20} color={COLORS.error} />
-        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -156,12 +136,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
     paddingHorizontal: 12,
     paddingBottom: 12,
-    gap: 8,
+    marginTop: 8,
   },
 
 }); 
