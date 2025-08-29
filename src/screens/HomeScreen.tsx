@@ -11,6 +11,7 @@ import type { RootStackParamList } from '../navigation/AppNavigation';
 import { EmptyNotes } from "../components/EmptyNotes"
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { ShareTestingPanel } from "../components/ShareTestingPanel";
 
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,6 +106,9 @@ const HomeScreen = () => {
       <TouchableOpacity style={styles.fab} onPress={takePicture}>
         <Ionicons name="add" size={24} color={COLORS.surface} />
       </TouchableOpacity>
+
+      {/* Development Testing Panel */}
+      <ShareTestingPanel />
     </SafeAreaView>
   )
 }

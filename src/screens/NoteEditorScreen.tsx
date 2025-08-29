@@ -12,6 +12,7 @@ import type { RouteProp } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import ImageGrid from '../components/ImageGrid';
 import ImageViewer from '../components/ImageViewer';
+import { Toast } from '../components/Toast';
 
 type NoteEditorRouteProp = RouteProp<RootStackParamList, 'NoteEditor'>;
 
@@ -21,10 +22,14 @@ type Props = {
 
 const NoteEditorScreen: React.FC<Props> = ({ route }) => {
   const routeNoteId = route.params?.noteId;
+  const sharedImages = route.params?.sharedImages;
+  const isSharedContent = route.params?.isSharedContent;
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [noteText, setNoteText] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { addNote, updateNote, notes } = useNotes();
@@ -54,7 +59,7 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
     }
   };
 
-  // Load existing note when editing
+  // Load existing note when editing or handle shared content
   useEffect(() => {
     if (routeNoteId) {
       const existing = notes.find(n => n.id === routeNoteId);
@@ -62,12 +67,24 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
         setNoteText(existing.note || '');
         setImageUris(existing.imageUris ?? []);
       }
+    } else if (sharedImages && sharedImages.length > 0) {
+      // Handle shared content
+      setNoteText('');
+      setImageUris(sharedImages);
+
+      // Show a toast to indicate shared content was loaded
+      if (isSharedContent) {
+        const count = sharedImages.length;
+        setToastMessage(`Added ${count} shared image${count > 1 ? 's' : ''} to note`);
+        setShowToast(true);
+        console.log('Shared content loaded:', sharedImages.length, 'images');
+      }
     } else {
       // new note
       setNoteText('');
       setImageUris([]);
     }
-  }, [routeNoteId, notes]);
+  }, [routeNoteId, notes, sharedImages, isSharedContent]);
 
   // Autosave: debounce changes and persist
   useEffect(() => {
@@ -135,6 +152,12 @@ const NoteEditorScreen: React.FC<Props> = ({ route }) => {
           visible={viewerVisible}
           initialIndex={viewerIndex}
           onClose={() => setViewerVisible(false)}
+        />
+
+        <Toast
+          message={toastMessage}
+          visible={showToast}
+          onHide={() => setShowToast(false)}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
