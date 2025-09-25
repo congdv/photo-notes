@@ -21,3 +21,7 @@ This project uses Expo SDK 52. To create production builds using EAS (Expo Appli
 Notes:
 - `eas.json` contains `production` and `preview` profiles. Adjust if you need custom keystore or provisioning profiles.
 - For App Store / Play Store submissions, use `eas submit` or upload the artifacts manually.
+
+
+# Buildwith EAS
+eas build --profile preview --platform android
